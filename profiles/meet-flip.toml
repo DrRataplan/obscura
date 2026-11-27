@@ -13,20 +13,23 @@
 # seen as resume at Center startup) and the startup read-back sequence
 # (dst 0d `0818`, `0804`, `4819`, `c818`).
 #
-# What the Flip does NOT have, per OBSBOT Center: gestures, mirror image,
-# noise reduction, auto gain and radio distance. It crops digitally (zoom and
-# "gimbal" moves are bursts of 16-byte `21 10` crop-window settings on
-# selector 6), so there is no joystick velocity and no gimbal reset here.
+# What the Flip does NOT have, per OBSBOT Center: noise reduction, auto gain
+# and radio distance. It crops digitally (zoom and "gimbal" moves are bursts
+# of 16-byte `21 10` crop-window settings on selector 6), so there is no
+# joystick velocity and no gimbal reset here. Gesture zoom exists, see the
+# unbound list below.
 #
 # Status read-back offsets measured on this model (selector 6 status block):
-# hdr [6], auto focus mode [13], mic during sleep [16], brightness [33],
-# microphone [34] bit 0x10, status light on/off [45], asleep [9] bit 0x02
-# (01 awake, 03 asleep). Byte 43 drifts on its own and is ignored.
+# hdr [6], auto focus mode [13], mic during sleep [16], mirror [19],
+# brightness [33], microphone [34] bit 0x10, pickup mode [40] bits 0x38,
+# status light on/off [45], asleep [9] bit 0x02 (01 awake, 03 asleep). Byte 43 drifts on its own and is ignored.
 #
 # Seen in the captures but NOT bound yet (needs a new binding type):
-#   composition mode    short `20 05 a b 01 c8 00` (5-byte payload),
-#                       b: 00 Group, 01 Single close-up, 02 Upper body;
-#                       how `a` relates to auto framing is still unclear
+#   one combined setting, short `20 05 A B G fLo fHi`, rewritten whole on
+#   every change: A auto framing (0/1), B composition (0 Group, 1 Single
+#   close-up, 2 Upper body), G gesture zoom (0/1), f gesture zoom factor
+#   x100 as u16 LE. Read back from the u16 at status [38..40]:
+#   factor << 4 | G << 3 | B << 1 | A. Needs a read-modify-write binding.
 #   presets             3 slots, but on dst 02 (`42d0` read, `82d0` save and
 #                       delete, `c2d0` recall) with a name field, unlike the
 #                       Tiny's dst 04 `4439` / `c439`
@@ -102,3 +105,8 @@ short = { id = 0x22, prefix = "00" }
 # Field of view: short `04 01 v`. 00 Wide, 01 Medium, 02 Narrow.
 [features.field_of_view]
 short = { id = 0x04 }
+
+# Mirror image, on the camera.
+[features.mirror_image]
+status = 19
+short = { id = 0x14 }

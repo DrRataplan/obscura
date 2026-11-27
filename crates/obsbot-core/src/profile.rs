@@ -437,6 +437,8 @@ mod tests {
         // Selector 6 writes seen from OBSBOT Center (firmware 4.5.3.3).
         assert_eq!(short(FeatureId::Hdr, 1), [0x01, 0x01, 0x01, 0x00]);
         assert_eq!(short(FeatureId::Hdr, 0), [0x01, 0x01, 0x00, 0x00]);
+        assert_eq!(short(FeatureId::MirrorImage, 1), [0x14, 0x01, 0x01, 0x00]);
+        assert_eq!(short(FeatureId::MirrorImage, 0), [0x14, 0x01, 0x00, 0x00]);
         assert_eq!(short(FeatureId::FieldOfView, 2), [0x04, 0x01, 0x02, 0x00]);
         assert_eq!(short(FeatureId::FieldOfView, 0), [0x04, 0x01, 0x00, 0x00]);
         assert_eq!(
@@ -455,7 +457,7 @@ mod tests {
         assert_eq!(short(FeatureId::AudioMode, 0), [0x22, 0x02, 0x00, 0x00]);
         assert_eq!(short(FeatureId::AudioMode, 2), [0x22, 0x02, 0x00, 0x02]);
         assert_eq!(short(FeatureId::AudioMode, 4), [0x22, 0x02, 0x00, 0x04]);
-        // The Flip has no gestures or gimbal.
+        // The Flip has no Tiny-style gesture switches or gimbal.
         assert!(!p.features.contains_key(&FeatureId::GestureControl));
         assert!(!p.features.contains_key(&FeatureId::GimbalReset));
         assert!(p.presets.is_none());

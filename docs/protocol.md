@@ -133,13 +133,16 @@ are not repeated here.
 | Field of view | `04 01 v` | none | 0 Wide, 1 Medium, 2 Narrow ✅ wide and narrow checked on the picture |
 | Auto focus mode | dst 02 `0236` u32 | [13] | 0 Global, 1 Face ✅ |
 | Sleep / Resume | dst 02 `c2a0` u32 1 / 0 | [9] bit 0x02 | [9] is 01 awake, 03 asleep ✅ |
-| Composition mode | `20 05 a b 01 c8 00` | ? | b: 0 Group, 1 Single close-up, 2 Upper body; meaning of `a` (auto framing?) unclear, *not bound* |
+| Mirror image | `14 01 v` | [19] | 0/1 ✅ (same as the Tiny) |
+| Auto framing, composition, gesture zoom and its factor | `20 05 A B G fLo fHi`, one setting rewritten whole on every change | u16 at [38..40]: `factor << 4 \| G << 3 \| B << 1 \| A` | A auto framing 0/1; B composition 0 Group, 1 Single close-up, 2 Upper body; G gesture zoom 0/1; f gesture zoom factor x100 (u16 LE; 100..400 seen, default 200); decoded from captures, *not bound* (needs a read-modify-write binding) |
 | Digital zoom / crop window | `21 10` + 4 x i32 | ? | bursts while zooming or panning in OBSBOT Center, *not bound* |
 | Presets | dst 02 `42d0` read, `82d0` save/delete, `c2d0` recall | | 3 slots; save carries the slot and a name; *not bound* |
 
-Byte 43 of the status block changes on its own and is ignored. Beauty and
-blur in OBSBOT Center produced no camera traffic. The Flip has no gestures,
-mirror image, noise reduction, auto gain or radio distance.
+Byte 43 of the status block changes on its own and is ignored. Beauty, blur
+and rotation in OBSBOT Center produced no camera command (rotation only
+restarts the video stream), so they are applied on the host; `12 01 01` is
+sent repeatedly at unrelated times. The Flip has no noise reduction, auto
+gain or radio distance.
 
 ## Standard UVC controls used by OBSBOT Center
 
