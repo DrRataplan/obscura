@@ -34,6 +34,10 @@ const BUILTIN: &[(&str, &str)] = &[
     ),
     ("meet-2.toml", include_str!("../../../profiles/meet-2.toml")),
     (
+        "meet-flip.toml",
+        include_str!("../../../profiles/meet-flip.toml"),
+    ),
+    (
         "meet-se.toml",
         include_str!("../../../profiles/meet-se.toml"),
     ),
