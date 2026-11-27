@@ -23,11 +23,7 @@
 # microphone [34] bit 0x10, status light on/off [45], asleep [9] bit 0x02
 # (01 awake, 03 asleep). Byte 43 drifts on its own and is ignored.
 #
-# Seen in the captures but NOT bound yet (needs catalog entries in
-# features.rs and/or a new binding type):
-#   audio pickup mode   short `22 02 00 v`: 05 Pure Audio, 00 Smart Omni,
-#                       02 Directional, 04 Dual-Directional
-#   field of view       short `04 01 v`: 00 Wide, 01 Medium, 02 Narrow
+# Seen in the captures but NOT bound yet (needs a new binding type):
 #   composition mode    short `20 05 a b 01 c8 00` (5-byte payload),
 #                       b: 00 Group, 01 Single close-up, 02 Upper body;
 #                       how `a` relates to auto framing is still unclear
@@ -95,3 +91,14 @@ status = 33
 short = { id = 0x1a }
 level = "magnitude"
 default_level = 3
+
+# Pickup mode: short `22 02 00 v`. 05 Pure Audio, 00 Smart Omni,
+# 02 Directional, 04 Dual-Directional.
+[features.audio_mode]
+status = 40
+status_mask = 0x38
+short = { id = 0x22, prefix = "00" }
+
+# Field of view: short `04 01 v`. 00 Wide, 01 Medium, 02 Narrow.
+[features.field_of_view]
+short = { id = 0x04 }

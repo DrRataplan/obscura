@@ -421,6 +421,47 @@ mod tests {
     }
 
     #[test]
+    fn meet_flip_bindings_match_captures() {
+        use crate::protocol::{encode_short, encode_value};
+        let p = DeviceProfile::for_usb(0x3564, 0xff06);
+        assert_eq!(p.id, "meet-flip");
+        assert!(p.system_info);
+        let short = |id: FeatureId, value: i64| {
+            let Binding::Vendor(VendorBinding { short: Some(s), .. }) = &p.features[&id] else {
+                panic!("{id:?} is a short setting")
+            };
+            let mut payload = s.prefix.clone();
+            payload.extend(encode_value(s.value, value, 1));
+            encode_short(s.id, &payload)[..4].to_vec()
+        };
+        // Selector 6 writes seen from OBSBOT Center (firmware 4.5.3.3).
+        assert_eq!(short(FeatureId::Hdr, 1), [0x01, 0x01, 0x01, 0x00]);
+        assert_eq!(short(FeatureId::Hdr, 0), [0x01, 0x01, 0x00, 0x00]);
+        assert_eq!(short(FeatureId::FieldOfView, 2), [0x04, 0x01, 0x02, 0x00]);
+        assert_eq!(short(FeatureId::FieldOfView, 0), [0x04, 0x01, 0x00, 0x00]);
+        assert_eq!(
+            short(FeatureId::MicDuringSleep, 1),
+            [0x13, 0x01, 0x01, 0x00]
+        );
+        assert_eq!(
+            short(FeatureId::DisableMicrophone, 0),
+            [0x1c, 0x01, 0x00, 0x00]
+        );
+        assert_eq!(
+            short(FeatureId::StatusLightBrightness, 3),
+            [0x1a, 0x01, 0x03, 0x00]
+        );
+        assert_eq!(short(FeatureId::AudioMode, 5), [0x22, 0x02, 0x00, 0x05]);
+        assert_eq!(short(FeatureId::AudioMode, 0), [0x22, 0x02, 0x00, 0x00]);
+        assert_eq!(short(FeatureId::AudioMode, 2), [0x22, 0x02, 0x00, 0x02]);
+        assert_eq!(short(FeatureId::AudioMode, 4), [0x22, 0x02, 0x00, 0x04]);
+        // The Flip has no gestures or gimbal.
+        assert!(!p.features.contains_key(&FeatureId::GestureControl));
+        assert!(!p.features.contains_key(&FeatureId::GimbalReset));
+        assert!(p.presets.is_none());
+    }
+
+    #[test]
     fn v4l2_offset_round_trips() {
         let p = DeviceProfile::for_usb(0x3564, 0xfeff);
         let Binding::V4l2(b) = &p.features[&FeatureId::ExposureCompensation] else {
